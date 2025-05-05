@@ -139,6 +139,28 @@ export function activate(context: vscode.ExtensionContext): void {
   });
 
   context.subscriptions.push(
+    vscode.commands.registerCommand("inline-time-tracker.showTimeChart", () => {
+      const panel = vscode.window.createWebviewPanel(
+        "timeChart",
+        "Time Tracker Chart",
+        vscode.ViewColumn.One,
+        { enableScripts: true }
+      );
+
+      const entries = globalContext.globalState.keys().map((key) => ({
+        label: key.split(/[\\/]/).pop() ?? key,
+        value: getStoredTime(key),
+      }));
+
+      const sorted = entries.sort((a, b) => b.value - a.value).slice(0, 5);
+      const labels = sorted.map((e) => e.label);
+      const data = sorted.map((e) => e.value);
+
+      panel.webview.html = getChartHtml(labels, data);
+    })
+  );
+
+  context.subscriptions.push(
     vscode.commands.registerCommand(
       "inline-time-tracker.exportTimes",
       async () => {
@@ -244,4 +266,44 @@ export function activate(context: vscode.ExtensionContext): void {
 export function deactivate(): void {
   clearInterval(interval);
   statusBarItem.dispose();
+}
+
+function getChartHtml(labels: string[], data: number[]): string {
+  return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body { margin: 0; padding: 1rem; background-color: #1e1e1e; color: white; font-family: sans-serif; }
+      canvas { background: #2e2e2e; border-radius: 8px; padding: 1rem; }
+    </style>
+  </head>
+  <body>
+    <h2>Top 5 Tracked Files</h2>
+    <canvas id="chart" width="400" height="250"></canvas>
+    <script>
+      const ctx = document.getElementById('chart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ${JSON.stringify(labels)},
+          datasets: [{
+            label: 'Total Time (sec)',
+            data: ${JSON.stringify(data)},
+            backgroundColor: '#ffc107'
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    </script>
+  </body>
+  </html>
+  `;
 }
