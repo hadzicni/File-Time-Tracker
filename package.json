@@ -1,0 +1,94 @@
+{
+  "name": "file-time-tracker",
+  "displayName": "File Time Tracker",
+  "description": "Track editing time per file in VS Code.",
+  "version": "1.0.0",
+  "publisher": "NikolaHadzic",
+  "engines": {
+    "vscode": "^1.99.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "icon": "icon.png",
+  "readme": "README.md",
+  "license": "LICENSE",
+  "contributes": {
+    "commands": [
+      {
+        "command": "inline-time-tracker.exportTimes",
+        "title": "Export Time Tracker JSON"
+      },
+      {
+        "command": "inline-time-tracker.resetTime",
+        "title": "Reset Time for Current File"
+      },
+      {
+        "command": "inline-time-tracker.showTimes",
+        "title": "Show Time Tracker Panel"
+      },
+      {
+        "command": "inline-time-tracker.toggleSort",
+        "title": "Toggle Time Sort Order"
+      },
+      {
+        "command": "inline-time-tracker.resetTimeForFile",
+        "title": "Reset Time for This File"
+      },
+      {
+        "command": "inline-time-tracker.exportTimeForFile",
+        "title": "Export Time for This File"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "timeTrackerPanel",
+          "name": "Time Tracker"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "inline-time-tracker.resetTimeForFile",
+          "when": "view == timeTrackerPanel",
+          "group": "inline"
+        },
+        {
+          "command": "inline-time-tracker.exportTimeForFile",
+          "when": "view == timeTrackerPanel",
+          "group": "inline"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "compile-tests": "tsc -p . --outDir out",
+    "lint": "eslint src",
+    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "test": "vscode-test",
+    "vscode:prepublish": "npm run package",
+    "watch": "npm-run-all -p watch:*",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
+    "watch-tests": "tsc -p . -w --outDir out"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.99.0",
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.5.2",
+    "esbuild": "^0.25.3",
+    "eslint": "^9.25.1",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.8.3"
+  }
+}
